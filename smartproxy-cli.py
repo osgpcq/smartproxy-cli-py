@@ -39,7 +39,7 @@ def request( resource, param1='', param2='',  param3='', method='GET', headers={
   return(response.json())
 #############################################################################
 #############################################################################
-parser = argparse.ArgumentParser(description='https://github.com/osgpcq/smartproxy-py',
+parser = argparse.ArgumentParser(description='https://github.com/osgpcq/smartproxy-cli-py',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--client',               default='exo',       help='Config file selection')
 parser.add_argument('--endpoints',            action='store_true', help='Endpoints list')
