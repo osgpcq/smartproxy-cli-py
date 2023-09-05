@@ -12,5 +12,12 @@ Extract informations from SmartProxy.
 ```
 
 
+# Configuration file
+```
+[smartproxy]
+api_key = XxX
+```
+
+
 # History
 Still in quick & dirty dev fase!

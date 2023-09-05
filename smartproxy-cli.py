@@ -56,7 +56,7 @@ config_file='./smartproxy-'+args.client+'.conf'
 if os.path.isfile(config_file):
   parser = ConfigParser()
   parser.read('./smartproxy-'+args.client+'.conf', encoding='utf-8')
-  api_key = parser.get('smartproxy', 'api_key')
+  api_key = 'api-key='+parser.get('smartproxy', 'api_key')
 else:
   sys.exit('Configuration file not found!')
 
