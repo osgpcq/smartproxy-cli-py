@@ -17,21 +17,21 @@ from tabulate import tabulate
 api_ver = 'v2'
 api_url = 'https://api.smartproxy.com/'+api_ver+'/'
 
-def request( resource, param1='', param2='',  param3='', method='GET', headers={"accept": "application/json",} ):
+def request( method='GET', resource='', params='', headers={"accept": "application/json",} ):
   url=api_url+resource
-  if not param1:
-    url_f=url
-  else:
-    url_f=url+'?'+param1
-  if param2:
-    url_f=url_f+'&'+param2
-  if param3:
-    url_f=url_f+'&'+param3
+  if params:
+    urlp=''
+    for param in params:
+      if urlp=='':
+        urlp=urlp+param
+      else:
+        urlp=urlp+"&"+param
+    url=url+"?"+urlp
   if (args.debug):
-    print(url_f)
+    print(url)
   response = requests.request(
     method,
-    url_f,
+    url,
     headers=headers,
   )
   if not (args.noverbose) or (args.debug):
@@ -66,12 +66,12 @@ if (args.endpoints_type):
   endpoints_type=request( resource='endpoints/'+(args.endpoints_type))
 
 if (args.subscriptions):
-  subscriptions=request( resource='subscriptions', param1=api_key)
+  subscriptions=request( resource='subscriptions', params={ api_key } )
 if (args.users):
   if not (args.service_type):
-    users=request( resource='sub-users', param1=api_key )
+    users=request( resource='sub-users', params={ api_key} )
   else:
-    users=request( resource='sub-users', param1='service_type='+(args.service_type), param2=api_key )
+    users=request( resource='sub-users', params={ 'service_type='+(args.service_type), api_key } )
   table = []
   for user in users:
     table.append([
@@ -81,7 +81,7 @@ if (args.users):
   if (args.traffic):
     table = []
     for user in users:
-      traffic=request( resource='sub-users/'+str(user['id'])+'/traffic', param1='type=month', param2=api_key )
+      traffic=request( resource='sub-users/'+str(user['id'])+'/traffic', params={ 'type=month', api_key } )
       if 'traffic' in traffic:
         table.append([
           user['username'],
