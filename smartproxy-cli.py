@@ -42,11 +42,11 @@ def request( resource, param1='', param2='',  param3='', method='GET', headers={
 parser = argparse.ArgumentParser(description='https://github.com/osgpcq/smartproxy-cli-py',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--client',               default='exo',       help='Config file selection')
-parser.add_argument('--endpoints',            action='store_true', help='Endpoints list')
-parser.add_argument('--endpoints_type',       action='store',      help='Endpoints_type', choices=['random', 'sticky'])
+parser.add_argument('--endpoints',            action='store_true', help='List Endpoints')
+parser.add_argument('--endpoints_type',       action='store',      help='Chooe endpoints_type', choices=['random', 'sticky'])
 parser.add_argument('--subscriptions',        action='store_true', help='List subscriptions')
 parser.add_argument('--traffic',              action='store_true', help='List traffic --users needed')
-parser.add_argument('--users',                action='store_true', help='List usres')
+parser.add_argument('--users',                action='store_true', help='List users')
 parser.add_argument('--service_type',         action='store',      help='Choose service', choices=['residential_proxies', 'shared_proxies'])
 parser.add_argument('--debug',                action='store_true', help='Debug information')
 parser.add_argument('--noverbose',            action='store_true', default=False, help='Verbose')
@@ -72,6 +72,12 @@ if (args.users):
     users=request( resource='sub-users', param1=api_key )
   else:
     users=request( resource='sub-users', param1='service_type='+(args.service_type), param2=api_key )
+  table = []
+  for user in users:
+    table.append([
+      user['username'],
+    ]),
+  print(tabulate(sorted(table), headers=['username']))
   if (args.traffic):
     table = []
     for user in users:
