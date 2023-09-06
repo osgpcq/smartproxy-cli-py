@@ -19,21 +19,29 @@ api_url = 'https://api.smartproxy.com/'+api_ver+'/'
 
 def request( method='GET', resource='', params='', headers={"accept": "application/json",} ):
   url=api_url+resource
-  if params:
-    urlp=''
-    for param in params:
-      if urlp=='':
-        urlp=urlp+param
-      else:
-        urlp=urlp+"&"+param
-    url=url+"?"+urlp
   if (args.debug):
     print(url)
-  response = requests.request(
-    method,
-    url,
-    headers=headers,
-  )
+    # print statements from `http.client.HTTPConnection` to console/stdout
+    #HTTPConnection.debuglevel = 1
+  if method=='POST':
+    response = requests.post(
+      api_url+resource,
+      headers=headers,
+      data=params
+    )
+  elif method=='GET':
+    if params:
+      urlp=''
+      for param in params:
+        if urlp=='':
+          urlp=urlp+param
+        else:
+          urlp=urlp+"&"+param
+      url=url+"?"+urlp
+    response = requests.get(
+      url,
+      headers=headers,
+    )
   if not (args.noverbose) or (args.debug):
     print(json.dumps(json.loads(response.text), sort_keys=True, indent=2, separators=(',', ': ')))
   return(response.json())
@@ -41,7 +49,7 @@ def request( method='GET', resource='', params='', headers={"accept": "applicati
 #############################################################################
 parser = argparse.ArgumentParser(description='https://github.com/osgpcq/smartproxy-cli-py',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--client',               default='exo',       help='Config file selection')
+parser.add_argument('--client',               default='exo',       help='Choose the API key')
 parser.add_argument('--endpoints',            action='store_true', help='List Endpoints')
 parser.add_argument('--endpoints_type',       action='store',      help='Chooe endpoints_type', choices=['random', 'sticky'])
 parser.add_argument('--subscriptions',        action='store_true', help='List subscriptions')
@@ -52,11 +60,11 @@ parser.add_argument('--debug',                action='store_true', help='Debug i
 parser.add_argument('--noverbose',            action='store_true', default=False, help='Verbose')
 args = parser.parse_args()
 
-config_file='./smartproxy-'+args.client+'.conf'
+config_file='./config.conf'
 if os.path.isfile(config_file):
-  parser = ConfigParser()
-  parser.read('./smartproxy-'+args.client+'.conf', encoding='utf-8')
-  api_key = 'api-key='+parser.get('smartproxy', 'api_key')
+  parser = ConfigParser(interpolation=None)
+  parser.read(config_file, encoding='utf-8')
+  api_key = 'api-key='+parser.get('smartproxy', 'api_key_'+args.client)
 else:
   sys.exit('Configuration file not found!')
 
