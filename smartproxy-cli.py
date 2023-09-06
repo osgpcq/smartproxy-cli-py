@@ -36,8 +36,8 @@ def request( method='GET', resource='', params='', headers={"accept": "applicati
         if urlp=='':
           urlp=urlp+param
         else:
-          urlp=urlp+"&"+param
-      url=url+"?"+urlp
+          urlp=urlp+'&'+param
+      url=url+'?'+urlp
     response = requests.get(
       url,
       headers=headers,
