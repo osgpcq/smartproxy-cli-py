@@ -11,38 +11,34 @@ import requests
 import json
 import argparse
 import sys, os.path
+from http.client import HTTPConnection  # Debug mode
 from configparser import ConfigParser
 from tabulate import tabulate
 
 api_ver = 'v2'
 api_url = 'https://api.smartproxy.com/'+api_ver+'/'
-
-def request( method='GET', resource='', params='', headers={"accept": "application/json",} ):
+#############################################################################
+def request( method='GET', resource='' , auth='', headers={}, params='', data='' ):
+  # data:   POST, PUT, ...
+  # params: GET, ...
   url=api_url+resource
-  if (args.debug):
+  headers.update({'accept': 'application/json'})
+  if (args.verbose) or (args.debug):
     print(url)
-    # print statements from `http.client.HTTPConnection` to console/stdout
-    #HTTPConnection.debuglevel = 1
-  if method=='POST':
-    response = requests.post(
-      api_url+resource,
-      headers=headers,
-      data=params
-    )
-  elif method=='GET':
-    if params:
-      urlp=''
-      for param in params:
-        if urlp=='':
-          urlp=urlp+param
-        else:
-          urlp=urlp+'&'+param
-      url=url+'?'+urlp
-    response = requests.get(
-      url,
-      headers=headers,
-    )
-  if not (args.noverbose) or (args.debug):
+    if (args.debug):
+      # print statements from `http.client.HTTPConnection` to console/stdout
+      HTTPConnection.debuglevel=1
+  response=requests.request(
+    method,
+    api_url+resource,
+    auth=auth,
+    headers=headers,
+    params=params,
+    data=data
+  )
+  if (args.verbose) or (args.debug):
+    print('Status code: '+str(response.status_code))
+  if (args.debug):
     print(json.dumps(json.loads(response.text), sort_keys=True, indent=2, separators=(',', ': ')))
   return(response.json())
 #############################################################################
@@ -53,18 +49,20 @@ parser.add_argument('--client',               default='exo',       help='Choose 
 parser.add_argument('--endpoints',            action='store_true', help='List Endpoints')
 parser.add_argument('--endpoints_type',       action='store',      help='Chooe endpoints_type', choices=['random', 'sticky'])
 parser.add_argument('--subscriptions',        action='store_true', help='List subscriptions')
-parser.add_argument('--traffic',              action='store_true', help='List traffic --users needed')
 parser.add_argument('--users',                action='store_true', help='List users')
 parser.add_argument('--service_type',         action='store',      help='Choose service', choices=['residential_proxies', 'shared_proxies'])
+parser.add_argument('--traffic',              action='store_true', help='List traffic --users needed')
+parser.add_argument('--noheaders',            action='store_true', help='No headers in the output')
 parser.add_argument('--debug',                action='store_true', help='Debug information')
-parser.add_argument('--noverbose',            action='store_true', default=False, help='Verbose')
+#parser.add_argument('--verbose',              action='store_true', default=True, help='Verbose')
+parser.add_argument('--verbose',              action='store_true', default=False, help='Verbose')
 args = parser.parse_args()
 
 config_file='./config.conf'
 if os.path.isfile(config_file):
   parser = ConfigParser(interpolation=None)
   parser.read(config_file, encoding='utf-8')
-  api_key = 'api-key='+parser.get('smartproxy', 'api_key_'+args.client)
+  api_key = parser.get('smartproxy', 'api_key_'+args.client)
 else:
   sys.exit('Configuration file not found!')
 
@@ -74,22 +72,20 @@ if (args.endpoints_type):
   endpoints_type=request( resource='endpoints/'+(args.endpoints_type))
 
 if (args.subscriptions):
-  subscriptions=request( resource='subscriptions', params={ api_key } )
+  subscriptions=request( resource='subscriptions', params={ 'api-key': api_key } )
 if (args.users):
   if not (args.service_type):
-    users=request( resource='sub-users', params={ api_key} )
+    users=request( resource='sub-users', params={ 'api-key': api_key} )
   else:
-    users=request( resource='sub-users', params={ 'service_type='+(args.service_type), api_key } )
-  table = []
-  for user in users:
-    table.append([
-      user['username'],
-    ]),
-  print(tabulate(sorted(table), headers=['username']))
+    users=request( resource='sub-users', params={ 'service_type': args.service_type, 'api-key': api_key } )
+  if args.noheaders:
+    print(tabulate(sorted(users, key=lambda item: (item['username']) ), tablefmt='plain'))
+  else:
+    print(tabulate(sorted(users, key=lambda item: (item['username']) ), tablefmt='rounded_outline', headers='keys'))
   if (args.traffic):
     table = []
     for user in users:
-      traffic=request( resource='sub-users/'+str(user['id'])+'/traffic', params={ 'type=month', api_key } )
+      traffic=request( resource='sub-users/'+str(user['id'])+'/traffic', params={ 'type': 'month', 'api-key': api_key } )
       if 'traffic' in traffic:
         table.append([
           user['username'],
@@ -97,7 +93,10 @@ if (args.users):
           traffic['traffic_rx'],
           traffic['traffic_tx'],
         ])
-    print(tabulate(sorted(table, key=lambda item: (item[2]), reverse=True), headers=['username', 'traffic', 'traffic_rx', 'traffic_tx']))
+    if args.noheaders:
+      print(tabulate(sorted(table, key=lambda item: (item[2]), reverse=True), tablefmt='plain'))
+    else:
+      print(tabulate(sorted(table, key=lambda item: (item[2]), reverse=True), tablefmt='rounded_outline', headers=['username', 'traffic', 'traffic_rx', 'traffic_tx']))
 #############################################################################
 #############################################################################
 #############################################################################
