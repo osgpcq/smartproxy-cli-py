@@ -67,9 +67,9 @@ else:
   sys.exit('Configuration file not found!')
 
 if (args.endpoints):
-  endpoints=request( resource='endpoints')
+  endpoints=request( resource='endpoints' )
 if (args.endpoints_type):
-  endpoints_type=request( resource='endpoints/'+(args.endpoints_type))
+  endpoints_type=request( resource='endpoints/'+args.endpoints_type )
 
 if (args.subscriptions):
   subscriptions=request( resource='subscriptions', params={ 'api-key': api_key } )
@@ -78,7 +78,7 @@ if (args.users):
     users=request( resource='sub-users', params={ 'api-key': api_key} )
   else:
     users=request( resource='sub-users', params={ 'service_type': args.service_type, 'api-key': api_key } )
-  if args.noheaders:
+  if (args.noheaders):
     print(tabulate(sorted(users, key=lambda item: (item['username']) ), tablefmt='plain'))
   else:
     print(tabulate(sorted(users, key=lambda item: (item['username']) ), tablefmt='rounded_outline', headers='keys'))
@@ -93,7 +93,7 @@ if (args.users):
           traffic['traffic_rx'],
           traffic['traffic_tx'],
         ])
-    if args.noheaders:
+    if (args.noheaders):
       print(tabulate(sorted(table, key=lambda item: (item[2]), reverse=True), tablefmt='plain'))
     else:
       print(tabulate(sorted(table, key=lambda item: (item[2]), reverse=True), tablefmt='rounded_outline', headers=['username', 'traffic', 'traffic_rx', 'traffic_tx']))
