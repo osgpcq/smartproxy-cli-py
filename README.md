@@ -20,7 +20,7 @@ options:
   --traffic             List traffic --users needed (default: False)
   --noheaders           No headers in the output (default: False)
   --debug               Debug information (default: False)
-  --verbose           Verbose (default: False)
+  --verbose             Verbose (default: False)
 
 
 ./smartproxy-cli.py --users
