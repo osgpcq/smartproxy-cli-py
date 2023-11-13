@@ -47,7 +47,7 @@ parser = argparse.ArgumentParser(description='https://github.com/osgpcq/smartpro
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--client',               default='exo',       help='Choose the API key')
 parser.add_argument('--endpoints',            action='store_true', help='List Endpoints')
-parser.add_argument('--endpoints_type',       action='store',      help='Chooe endpoints_type', choices=['random', 'sticky'])
+parser.add_argument('--endpoints_type',       action='store',      help='Choose endpoints_type', choices=['random', 'sticky'])
 parser.add_argument('--subscriptions',        action='store_true', help='List subscriptions')
 parser.add_argument('--users',                action='store_true', help='List users')
 parser.add_argument('--service_type',         action='store',      help='Choose service', choices=['residential_proxies', 'shared_proxies'])
